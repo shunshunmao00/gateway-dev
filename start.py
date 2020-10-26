@@ -1,4 +1,4 @@
-from serviceboot import serviceboot
+import serviceboot
 
 
 serviceboot.start()

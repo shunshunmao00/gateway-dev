@@ -4,6 +4,7 @@ import requests
 import websockets
 from app.service import token_service
 from app.global_data.global_data import g
+import logging
 
 
 # 针对于websocket请求的代理, 收到websocket请求后, 与upstream建立websocket连接
@@ -16,6 +17,7 @@ async def get_up_websocket(prev_request):
     uri = prev_request.uri
     if service_name != 'portal':
         uri = strip_service_name(uri, service_name)
+    # if service_name != 'uvisible':
     if service_name != 'ability':
         raise Exception('当前未支持')
 
@@ -76,12 +78,12 @@ def get_service_name(path):
             path = path[5:]
         service_name = path[: path.find('/')]
 
+    logging.critical('service_name: {}'.format( service_name))
     if service_name in g.consul_client.get_service_names():
         return service_name
 
     # 前端或后端微服务未启动（默认后端微服务以'u'打头，前端微服务以'p'打头，特殊的例外），直接返回错误。其他命名情况会默认转发至portal。
-    if '.' not in service_name and (
-            service_name.startswith('u') or service_name.startswith('p') or service_name == 'ability'):
+    if '.' not in service_name and (service_name.startswith('u') or service_name.startswith('p') or service_name == 'ability' or service_name == 'uvisible'):
         return None
 
     return 'portal'
